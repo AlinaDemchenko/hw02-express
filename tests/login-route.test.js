@@ -5,13 +5,14 @@ const app = require("../app");
 const gravatar = require("gravatar");
 const { User } = require("../models/user");
 
-const { DB_HOST_TEST, PORT } = process.env;
+const { DB_HOST_TEST, PORT = 3000} = process.env;
 
 describe("test route", () => {
   let server = null;
   beforeAll(async () => {
     server = app.listen(PORT);
     await mongoose.connect(DB_HOST_TEST);
+    console.log(PORT);
   });
   afterAll(async () => {
     server.close();
@@ -36,9 +37,11 @@ describe("test route", () => {
       email: "test@example.com",
       password: "qwertyuio"
     };
-    const res = await request(app).post("api/users/login").send(loginUser);
+    const res = await request(app).post("/api/users/login").send(loginUser);
     expect(res.statusCode).toBe(200);
     expect(res.body.token).toBeTruthy();
+    expect(typeof res.body.user.email).toBe("string");
+    expect(typeof res.body.user.subscription).toBe("string");
     const {token} = await User.findById(user._id);
     expect(res.body.token).toBe(token);
   });
